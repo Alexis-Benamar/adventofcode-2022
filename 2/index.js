@@ -9,6 +9,13 @@ const loses = {
   Z: 'A'
 }
 
+const moves = 'XYZ'
+const outcome = {
+  X: -1,
+  Y: 0,
+  Z: 1,
+}
+
 /**
  * Points table
  */
@@ -23,16 +30,16 @@ const points = {
 
 const data = readFileSync('./data.txt').toString()
 const moveSets = data.split('\n')
-let total = 0
+let totalPart1 = 0
+let totalPart2 = 0
 
 console.log(moveSets)
 
 /**
  * Convert their move (A, B, C) to (X, Y, Z) by offsetting charCode
- * Compare their offsetted move with your move
  */
-function matchingMoves(them, you) {
-  return you === String.fromCharCode(them.charCodeAt(0) + 23)
+function offsetMove(them) {
+  return String.fromCharCode(them.charCodeAt(0) + 23)
 }
 
 /**
@@ -43,9 +50,19 @@ function matchingMoves(them, you) {
 function calculateRound(them, you) {
   if (them === loses[you]) return points['lost']
 
-  if (matchingMoves(them, you)) return points['draw']
+  if (you === offsetMove(them)) return points['draw']
 
   return points['win']
+}
+
+/**
+ * Given set of moves XYZ, X loses over Y which loses over Z.
+ * So, given letter at index n in XYZ, n will lose over n+1, draw over n, and win over n-1
+ * This gets the moves element depending on the outcome (lose: -1, 0, 1)
+ * It will loop over
+ */
+function getMoveForOutcome(them, you) {
+  return moves[(moves.indexOf(them) + outcome[you] + moves.length) % moves.length]
 }
 
 /**
@@ -56,7 +73,12 @@ moveSets.forEach((moves) => {
   const [them, you] = moves.split(' ')
 
   // Part 1
-  total = total + points[you] + calculateRound(them, you)
+  totalPart1 = totalPart1 + points[you] + calculateRound(them, you)
+
+  // Part 2
+  const moveForOutcome = getMoveForOutcome(offsetMove(them), you)
+  totalPart2 = totalPart2 + points[moveForOutcome] + calculateRound(them, moveForOutcome)
 })
 
-console.log(total)
+console.log('part1:', totalPart1)
+console.log('part2:', totalPart2)
