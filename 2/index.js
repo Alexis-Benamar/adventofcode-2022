@@ -1,4 +1,5 @@
 const { readFileSync } = require('fs')
+const path = require('path')
 
 /**
  * Opponents moves (A, B, C) that make you (X, Y, Z) lose
@@ -28,7 +29,7 @@ const points = {
   win: 6,
 }
 
-const data = readFileSync('./data.txt').toString()
+const data = readFileSync(path.join(__dirname, './data.txt')).toString()
 const moveSets = data.split('\n')
 let totalPart1 = 0
 let totalPart2 = 0

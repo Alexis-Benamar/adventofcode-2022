@@ -1,6 +1,7 @@
 const { readFileSync } = require('fs')
+const path = require('path')
 
-const data = readFileSync('./data.txt').toString()
+const data = readFileSync(path.join(__dirname, './data.txt')).toString()
 
 const rucksacks = data.split('\n')
 
