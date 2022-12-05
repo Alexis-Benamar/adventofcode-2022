@@ -11,10 +11,9 @@ const initialSplitted = initialString.split('\n')
 initialSplitted.pop() // remove column header
 const initialArray = initialSplitted.map(line => line.match(/(\w|[\s]{4})/gm)) // split lines by group of [A] letter or '    '
 
-// Get columns by rotating initialArray
-// remove empty items // matrix magic (rotates it 90 degrees)
+// Get columns by doing some matrix magic (rotates it 90 degrees)
 const columns = initialArray[0]
-  .map((val, index) => initialArray.map(row => row[index]).reverse()) // matrix magic (rotates it 90 degrees)
+  .map((val, index) => initialArray.map(row => row[index]).reverse())
   .map(column => column.filter(item => item !== '    ')) // remove empty items
 
 /**
@@ -53,6 +52,5 @@ moves.forEach(move => moveCrate(move))
 console.log('\n- Final crates piles:')
 columns.forEach(column => console.log(JSON.stringify(column)))
 
-// Part 1 answer
 const answer = columns.map(column => column[column.length - 1]).join('')
 console.log(answer)
