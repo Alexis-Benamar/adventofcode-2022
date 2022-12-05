@@ -37,9 +37,10 @@ function moveCrate(move) {
 
   for (let i = 0; i < quantity; i++) {
     const moved = columns[from - 1].pop()
-    columns[to - 1].push(moved)
     movedCrates.push(moved)
   }
+
+  columns[to - 1].push(...movedCrates.reverse())
 
   console.log(`moved ${movedCrates} from ${source} to ${destination}`)
 }
