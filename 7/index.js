@@ -1,7 +1,7 @@
 const { readFileSync } = require('fs')
 const path = require('path')
 
-const data = readFileSync(path.join(__dirname, './data.txt')).toString().split('\r\n')
+const data = readFileSync(path.join(__dirname, './data.txt')).toString().split('\n')
 
 /**
  * Parse lines
@@ -16,12 +16,11 @@ data.forEach((line, index) => {
   if (line.startsWith('$ cd')) {
     if (args[2] === '..') {
       currentPath.pop()
-
-      return
+    } else {
+      folders.push([...currentPath, args[2]].join(''))
+      // Adds `${args[2]}/` to folder array
+      currentPath.push((args[2] === '/' ? '' : args[2]) + '/')
     }
-
-    folders.push([...currentPath, args[2]].join(''))
-    currentPath.push((args[2] === '/' ? '' : args[2]) + '/')
   }
 
   if (line.startsWith('$ ls')) {
@@ -47,9 +46,10 @@ data.forEach((line, index) => {
 })
 
 /**
- * Calculate answer
+ * Calculate answers
  */
 let totalSize = 0
+let folderSizes = []
 
 folders.forEach(folder => {
   // Get size of all content within folder
@@ -61,7 +61,14 @@ folders.forEach(folder => {
   if (size <= 100000) {
     totalSize += size
   }
+
+  folderSizes.push(size)
 })
 
+const sortedSizes = folderSizes.sort((a, b) => a - b)
+const freeSpace = 70000000 - sortedSizes[sortedSizes.length - 1]
+const spaceToFreeUp = 30000000 - freeSpace
+const bigEnough = sortedSizes.find(size => size >= spaceToFreeUp)
 
-console.log(totalSize)
+console.log(totalSize) // Part 1 answer
+console.log(bigEnough) // Part 2 answer
