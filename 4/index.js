@@ -9,8 +9,8 @@ const pairs = data
   .map(pair => pair.split(',')
   .map(stringPair => stringPair.split('-').map(item => Number(item))))
 
-let count = 0;
-let overlapCount = 0;
+let count = 0
+let overlapCount = 0
 
 // Checks if b is within a
 const aHasB = (a, b) => a[0] <= b[0] && a[1] >= b[1]
