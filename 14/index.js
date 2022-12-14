@@ -1,12 +1,16 @@
 const { readFileSync, writeFileSync } = require('fs')
 const path = require('path')
 
-const fileName = 'test'
+const fileName = 'data' // Should be 'data' or 'test'
+
 const data = readFileSync(path.join(__dirname, `./${fileName}.txt`)).toString()
 const lines = data
   .split('\n')
   .map(line => line.split(' -> '))
 
+/**
+ * Setup
+ */
 const sortedX = data.match(/\d+,/gm).map(num => Number(num.slice(0, num.length - 1))).sort((a, b) => a - b)
 const sortedY = data.match(/,\d+/gm).map(num => Number(num.slice(1, num.length))).sort((a, b) => a - b)
 const minX = sortedX[0]
@@ -15,10 +19,11 @@ const maxX = sortedX[sortedX.length - 1]
 const maxY = sortedY[sortedY.length - 1]
 const gridMinX = Math.floor(minX / 10) * 10
 const gridMaxX = Math.ceil(maxX / 10) * 10
-const gridMinY = Math.floor(minY / 10) * 10
+const gridMinY = 0
 const gridMaxY = Math.ceil(maxY / 10) * 10
 const cols = gridMaxX - gridMinX
-const rows = gridMaxY - gridMinY
+const rows = gridMaxY
+let output = ''
 
 console.log('minX, maxX, minY, maxY', minX, maxX, minY, maxY)
 console.log('gridMinX, gridMaxX, gridMinY, gridMaxY', gridMinX, gridMaxX, gridMinY, gridMaxY)
@@ -44,9 +49,9 @@ grid[500 - gridMinX][0] = '+'
  * @returns
  */
 function draw(x, y) {
-  if (grid[x - gridMinX][y - gridMinY] === '#') return
+  if (grid[x - gridMinX][y] === '#') return
 
-  grid[x - gridMinX][y - gridMinY] = '#'
+  grid[x - gridMinX][y] = '#'
 }
 
 /**
@@ -69,11 +74,11 @@ function addLines() {
       // While draw coords have not reached end coords
       while ((drawX !== end[0]) || (drawY !== end[1])) {
         if (drawX !== end[0]) {
-          if (drawX > end[0]) drawX-- // walk left
-          if (drawX < end[0]) drawX++ // walk right
+          if (drawX > end[0]) drawX-- // Walk left
+          if (drawX < end[0]) drawX++ // Walk right
         } else if (drawY !== end[1]) {
-          if (drawY > end[1]) drawY-- // walk up
-          if (drawY < end[1]) drawY++ // walk down
+          if (drawY > end[1]) drawY-- // Walk up
+          if (drawY < end[1]) drawY++ // Walk down
         }
 
         // Draw on updated coordinates
@@ -84,23 +89,93 @@ function addLines() {
 }
 
 /**
- * Add lines to grid
+ * Make sand fall
+ * If grain of sand gets stationnary, returns false
+ * Else, if grain of sand reaches bottom of grid, return true
+ * @returns boolean
  */
-addLines()
+function sandFall() {
+  let grain = [500 - gridMinX, gridMinY] // Initiate grain of sand at coordinates 500,0
+
+  while (true) {
+    const [nextL, nextM, nextR] = [
+      [grain[0] - 1, grain[1] + 1], // Bottom left
+      [grain[0], grain[1] + 1],     // Bottom middle
+      [grain[0] + 1, grain[1] + 1], // Bottom right
+    ]
+
+    if (grid[nextM[0]][nextM[1]] === undefined) {
+      console.log('grain reached bottom, stopping sand fall...')
+
+      return true
+    }
+
+    if (grid[nextM[0]][nextM[1]] === '.') {
+      grain = nextM
+      
+      continue
+    }
+
+    if (grid[nextL[0]][nextL[1]] === '.') {
+      grain = nextL
+      
+      continue
+    }
+
+    if (grid[nextR[0]][nextR[1]] === '.') {
+      grain = nextR
+      
+      continue
+    }
+
+    grid[grain[0]][grain[1]] = 'o'
+
+    return false
+  }
+}
 
 /**
  * Draw grid
  */
-let output = ''
-for (let j = 0; j < rows; j++) {
-  for (let i = 0; i < cols; i++) {
-    output += grid[i][j]
+function drawGrid() {
+  output = ''
+
+  for (let j = 0; j < rows; j++) {
+    for (let i = 0; i < cols; i++) {
+      output += grid[i][j]
+    }
+
+    output += '\n'
   }
 
-  output += '\n'
+  console.log(output)
 }
 
-console.log(output)
+/**
+ * Run simulation
+ * - add lines to grid to build map
+ * - make sand fall until one grain of sand reaches grid bottom limit
+ */
+function runSimulation() {
+  addLines()
 
-// Save output for better visualization
-writeFileSync(path.join(__dirname, `./output.${fileName}.txt`), output, { encoding: 'utf-8' })
+  let units = 0
+
+  while (true) {
+    const hasSandFallen = sandFall()
+
+    if (hasSandFallen) break
+
+    units++
+  }
+
+  console.log('\n')
+  drawGrid()
+
+  console.log('units of sand:', units)
+
+  // Save final output for better visualization
+  writeFileSync(path.join(__dirname, `./output.${fileName}.txt`), output, { encoding: 'utf-8' })
+}
+
+runSimulation()
