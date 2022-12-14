@@ -2,6 +2,7 @@ const { readFileSync, writeFileSync } = require('fs')
 const path = require('path')
 
 const fileName = 'data' // Should be 'data' or 'test'
+const withFloor = true // Adds floor at bottom
 
 const data = readFileSync(path.join(__dirname, `./${fileName}.txt`)).toString()
 const lines = data
@@ -17,13 +18,20 @@ const minX = sortedX[0]
 const minY = sortedY[0]
 const maxX = sortedX[sortedX.length - 1]
 const maxY = sortedY[sortedY.length - 1]
-const gridMinX = Math.floor(minX / 10) * 10
-const gridMaxX = Math.ceil(maxX / 10) * 10
+const gridMinX = 0
+const gridMaxX = 1000
 const gridMinY = 0
-const gridMaxY = Math.ceil(maxY / 10) * 10
+const gridMaxY = maxY + 3
 const cols = gridMaxX - gridMinX
 const rows = gridMaxY
+
+/**
+ * Output related variables
+ * leftmostX and rightmostX are based on leftmost & rightmost grains of sand
+ */
 let output = ''
+let leftmostX = 0
+let rightmostX = 0
 
 console.log('minX, maxX, minY, maxY', minX, maxX, minY, maxY)
 console.log('gridMinX, gridMaxX, gridMinY, gridMaxY', gridMinX, gridMaxX, gridMinY, gridMaxY)
@@ -40,7 +48,16 @@ for (let i = 0; i < cols; i++) {
   }
   grid[i] = row
 }
+
+// Sand source
 grid[500 - gridMinX][0] = '+'
+
+// Add floor
+if (withFloor) {
+  for (let i = 0; i < cols; i++) {
+    grid[i][gridMaxY - 1] = '#'
+  }
+}
 
 /**
  * Draw point of line on grid
@@ -97,6 +114,12 @@ function addLines() {
 function sandFall() {
   let grain = [500 - gridMinX, gridMinY] // Initiate grain of sand at coordinates 500,0
 
+  if (grid[grain[0]][grain[1]] === 'o') {
+    console.log('source blocked!')
+
+    return true
+  }
+
   while (true) {
     const [nextL, nextM, nextR] = [
       [grain[0] - 1, grain[1] + 1], // Bottom left
@@ -129,6 +152,8 @@ function sandFall() {
     }
 
     grid[grain[0]][grain[1]] = 'o'
+
+    // TODO: set leftmostX & rightmostX here
 
     return false
   }
