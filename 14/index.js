@@ -30,8 +30,8 @@ const rows = gridMaxY
  * leftmostX and rightmostX are based on leftmost & rightmost grains of sand
  */
 let output = ''
-let leftmostX = 0
-let rightmostX = 0
+let leftmostX = minX
+let rightmostX = maxX
 
 console.log('minX, maxX, minY, maxY', minX, maxX, minY, maxY)
 console.log('gridMinX, gridMaxX, gridMinY, gridMaxY', gridMinX, gridMaxX, gridMinY, gridMaxY)
@@ -153,7 +153,8 @@ function sandFall() {
 
     grid[grain[0]][grain[1]] = 'o'
 
-    // TODO: set leftmostX & rightmostX here
+    if (grain[0] < leftmostX) leftmostX = grain[0]
+    if (grain[0] > rightmostX) rightmostX = grain[0]
 
     return false
   }
@@ -161,12 +162,15 @@ function sandFall() {
 
 /**
  * Draw grid
+ * Since we know the leftmost and rightmost X value,
+ * we only have to draw data contained between those two values
+ * (with a slight offset to give the pile of sand some space)
  */
 function drawGrid() {
   output = ''
 
   for (let j = 0; j < rows; j++) {
-    for (let i = 0; i < cols; i++) {
+    for (let i = leftmostX - 5; i < rightmostX + 6; i++) {
       output += grid[i][j]
     }
 
